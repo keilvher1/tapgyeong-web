@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase, DEMO_USER_ID } from '../lib/supabase'
 
 const KAKAO_REST_KEY = '39b318ede845f101187c8b3f9d33355c'
+const KAKAO_CLIENT_SECRET = 'isOdCkWBYgFehdfP9gjIWhrfLVWH3CyX'
 
 export default function KakaoCallback() {
   const navigate = useNavigate()
@@ -37,6 +38,7 @@ export default function KakaoCallback() {
           body: new URLSearchParams({
             grant_type: 'authorization_code',
             client_id: KAKAO_REST_KEY,
+            client_secret: KAKAO_CLIENT_SECRET,
             redirect_uri: redirectUri,
             code,
           }),
