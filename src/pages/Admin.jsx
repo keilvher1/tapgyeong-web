@@ -58,7 +58,7 @@ export default function Admin() {
     return (
       <>
         <style>{ADMIN_RESPONSIVE_CSS}</style>
-        <div style={S.authWrap}>
+        <div className="admin-auth-wrap" style={S.authWrap}>
           <div className="admin-auth-card" style={S.authCard}>
             <i className="fa-solid fa-shield-halved" style={{ fontSize: 36, color: '#4A6CF7', marginBottom: 16 }} />
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A2E', marginBottom: 8 }}>관리자 로그인</h2>

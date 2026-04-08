@@ -43,6 +43,14 @@ body {
   box-shadow: 0 0 40px rgba(0,0,0,0.06);
 }
 
+/* Admin 페이지: 480px 제한 해제 */
+#root:has(.admin-layout),
+#root:has(.admin-auth-wrap) {
+  max-width: 100%;
+  box-shadow: none;
+  background: #F0F2F8;
+}
+
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; border: none; outline: none; font-family: inherit; }
 input, textarea, select { font-family: inherit; outline: none; }
