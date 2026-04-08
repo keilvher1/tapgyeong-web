@@ -10,7 +10,13 @@ import {
   orderBy,
   limit,
   updateDoc,
+  setDoc,
+  addDoc,
+  deleteDoc,
   getCountFromServer,
+  increment,
+  serverTimestamp,
+  writeBatch,
 } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -60,5 +66,21 @@ export async function countDocs(collectionName, ...constraints) {
   return snap.data().count
 }
 
+// Helper: create a doc with auto ID
+export async function createDoc(collectionName, data) {
+  const ref = await addDoc(collection(db, collectionName), data)
+  return ref.id
+}
+
+// Helper: create a doc with specific ID
+export async function setById(collectionName, docId, data) {
+  await setDoc(doc(db, collectionName, docId), data)
+}
+
+// Helper: delete a doc
+export async function removeById(collectionName, docId) {
+  await deleteDoc(doc(db, collectionName, docId))
+}
+
 // Re-export firestore query helpers for use in pages
-export { collection, doc, where, orderBy, limit, query }
+export { collection, doc, where, orderBy, limit, query, increment, serverTimestamp, writeBatch, setDoc, addDoc, deleteDoc }

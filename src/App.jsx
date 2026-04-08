@@ -8,10 +8,13 @@ import Recommend from './pages/Recommend'
 import ExploreMap from './pages/ExploreMap'
 import Coupon from './pages/Coupon'
 import AiRecommend from './pages/AiRecommend'
+import NfcTag from './pages/NfcTag'
+import Admin from './pages/Admin'
 
 function App() {
   const location = useLocation()
-  const hideNav = ['/', '/login', '/auth/kakao/callback'].includes(location.pathname)
+  const hideNav = ['/', '/login', '/auth/kakao/callback', '/admin'].includes(location.pathname)
+    || location.pathname.startsWith('/tag')
 
   return (
     <>
@@ -25,6 +28,9 @@ function App() {
           <Route path="/explore" element={<ExploreMap />} />
           <Route path="/coupon" element={<Coupon />} />
           <Route path="/ai" element={<AiRecommend />} />
+          <Route path="/tag" element={<NfcTag />} />
+          <Route path="/tag/:spotId" element={<NfcTag />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
       {!hideNav && <BottomNav />}
