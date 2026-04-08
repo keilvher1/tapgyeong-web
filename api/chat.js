@@ -29,7 +29,8 @@ export default async function handler(req) {
   }
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    const { messages } = body;
 
     const result = streamText({
       model: 'openai/gpt-4o-mini',
@@ -37,7 +38,7 @@ export default async function handler(req) {
       messages,
     });
 
-    return result.toDataStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('AI API Error:', error);
     return new Response(

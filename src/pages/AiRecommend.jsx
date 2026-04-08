@@ -8,19 +8,28 @@ const quickPrompts = [
   { emoji: '📸', label: '인스타 핫플', prompt: '경북 3개 도시(경주, 안동, 포항)에서 인스타 감성 사진 찍기 좋은 핫플 코스 추천해줘' },
 ]
 
+const WELCOME_MESSAGE = {
+  id: 'welcome',
+  role: 'assistant',
+  parts: [{ type: 'text', text: '안녕하세요! 🎒 탭경 AI 여행 도우미입니다.\n\n경주, 안동, 포항의 맞춤형 여행 코스를 추천해드릴게요. 여행 스타일, 일정, 관심사를 알려주시면 딱 맞는 코스를 만들어드립니다!\n\n아래 버튼을 눌러 빠르게 시작해보세요 👇' }],
+}
+
+function getTextFromParts(parts) {
+  if (!parts) return ''
+  return parts
+    .filter(p => p.type === 'text')
+    .map(p => p.text)
+    .join('')
+}
+
 export default function AiRecommend() {
   const scrollRef = useRef(null)
-  const inputRef = useRef(null)
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setInput } = useChat({
-    api: '/api/chat',
-    initialMessages: [
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: '안녕하세요! 🎒 탭경 AI 여행 도우미입니다.\n\n경주, 안동, 포항의 맞춤형 여행 코스를 추천해드릴게요. 여행 스타일, 일정, 관심사를 알려주시면 딱 맞는 코스를 만들어드립니다!\n\n아래 버튼을 눌러 빠르게 시작해보세요 👇'
-      }
-    ]
+  const [input, setInput] = useState('')
+  const { messages, sendMessage, status, setMessages } = useChat({
+    messages: [WELCOME_MESSAGE],
   })
+
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -28,12 +37,16 @@ export default function AiRecommend() {
     }
   }, [messages])
 
-  const handleQuickPrompt = (prompt) => {
-    setInput(prompt)
-    setTimeout(() => {
-      const form = document.getElementById('ai-chat-form')
-      if (form) form.requestSubmit()
-    }, 50)
+  const handleSend = (text) => {
+    const msg = (text || input).trim()
+    if (!msg || isLoading) return
+    setInput('')
+    sendMessage({ text: msg })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    handleSend()
   }
 
   const showQuickPrompts = messages.length <= 1
@@ -69,34 +82,38 @@ export default function AiRecommend() {
         flex: 1, overflowY: 'auto', padding: '16px 16px 8px',
         display: 'flex', flexDirection: 'column', gap: 12
       }}>
-        {messages.map((msg) => (
-          <div key={msg.id} style={{
-            display: 'flex',
-            justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-          }}>
-            {msg.role === 'assistant' && (
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%', marginRight: 8, flexShrink: 0,
-                background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 14, color: 'white', marginTop: 2
-              }}>🤖</div>
-            )}
-            <div style={{
-              maxWidth: '80%', padding: '12px 16px', borderRadius: 16,
-              fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-              ...(msg.role === 'user' ? {
-                background: 'linear-gradient(135deg, #4A6CF7, #6C8CFF)',
-                color: 'white', borderBottomRightRadius: 4
-              } : {
-                background: 'white', color: '#1e293b',
-                borderBottomLeftRadius: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-              })
+        {messages.map((msg) => {
+          const text = getTextFromParts(msg.parts)
+          if (!text) return null
+          return (
+            <div key={msg.id} style={{
+              display: 'flex',
+              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
             }}>
-              {msg.content}
+              {msg.role === 'assistant' && (
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', marginRight: 8, flexShrink: 0,
+                  background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 14, color: 'white', marginTop: 2
+                }}>🤖</div>
+              )}
+              <div style={{
+                maxWidth: '80%', padding: '12px 16px', borderRadius: 16,
+                fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                ...(msg.role === 'user' ? {
+                  background: 'linear-gradient(135deg, #4A6CF7, #6C8CFF)',
+                  color: 'white', borderBottomRightRadius: 4
+                } : {
+                  background: 'white', color: '#1e293b',
+                  borderBottomLeftRadius: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
+                })
+              }}>
+                {text}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
 
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -121,7 +138,7 @@ export default function AiRecommend() {
         {showQuickPrompts && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
             {quickPrompts.map((qp, i) => (
-              <button key={i} onClick={() => handleQuickPrompt(qp.prompt)} style={{
+              <button key={i} onClick={() => handleSend(qp.prompt)} style={{
                 padding: '12px 16px', borderRadius: 12, border: '1px solid #e2e8f0',
                 background: 'white', cursor: 'pointer', textAlign: 'left',
                 display: 'flex', alignItems: 'center', gap: 10,
@@ -140,14 +157,13 @@ export default function AiRecommend() {
       </div>
 
       {/* Input */}
-      <form id="ai-chat-form" onSubmit={handleSubmit} style={{
+      <form onSubmit={handleSubmit} style={{
         padding: '12px 16px', borderTop: '1px solid #e2e8f0', background: 'white',
         display: 'flex', gap: 8, alignItems: 'center'
       }}>
         <input
-          ref={inputRef}
           value={input}
-          onChange={handleInputChange}
+          onChange={e => setInput(e.target.value)}
           placeholder="여행 스타일, 일정을 알려주세요..."
           disabled={isLoading}
           style={{
