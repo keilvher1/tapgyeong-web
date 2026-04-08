@@ -32,10 +32,12 @@ export default async function handler(req) {
     const body = await req.json();
     const { messages } = body;
 
+    const modelMessages = await convertToModelMessages(messages);
+
     const result = streamText({
       model: 'openai/gpt-4o-mini',
       system: SYSTEM_PROMPT,
-      messages: convertToModelMessages(messages),
+      messages: modelMessages,
     });
 
     return result.toUIMessageStreamResponse();
