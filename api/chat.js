@@ -1,4 +1,4 @@
-import { streamText } from 'ai';
+import { streamText, convertToModelMessages } from 'ai';
 
 export const config = {
   runtime: 'edge',
@@ -35,7 +35,7 @@ export default async function handler(req) {
     const result = streamText({
       model: 'openai/gpt-4o-mini',
       system: SYSTEM_PROMPT,
-      messages,
+      messages: convertToModelMessages(messages),
     });
 
     return result.toUIMessageStreamResponse();
