@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useChat } from '@ai-sdk/react'
+import {
+  BlurFade, AnimatedGradientText, ShimmerButton, Particles,
+  MagicCard, StaggerContainer, StaggerItem, BorderBeam
+} from '../components/magicui'
 
 const quickPrompts = [
   { emoji: '🏛️', label: '경주 문화유산 코스', prompt: '경주에서 문화유산 위주로 당일치기 코스 추천해줘' },
@@ -16,10 +21,7 @@ const WELCOME_MESSAGE = {
 
 function getTextFromParts(parts) {
   if (!parts) return ''
-  return parts
-    .filter(p => p.type === 'text')
-    .map(p => p.text)
-    .join('')
+  return parts.filter(p => p.type === 'text').map(p => p.text).join('')
 }
 
 export default function AiRecommend() {
@@ -58,23 +60,43 @@ export default function AiRecommend() {
     }}>
       {/* Header */}
       <div style={{
-        padding: '16px 20px', background: 'linear-gradient(135deg, #4A6CF7 0%, #7DD3FC 100%)',
-        color: 'white', display: 'flex', alignItems: 'center', gap: 12
+        padding: '16px 20px',
+        background: 'linear-gradient(135deg, #0F172A 0%, #4A6CF7 50%, #7DD3FC 100%)',
+        color: 'white', display: 'flex', alignItems: 'center', gap: 12,
+        position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
-        }}>🤖</div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 16 }}>AI 코스 추천</div>
+        <Particles count={12} color="rgba(255,255,255,0.3)" />
+        <motion.div
+          style={{
+            width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
+            position: 'relative', zIndex: 1,
+          }}
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
+          🤖
+        </motion.div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <AnimatedGradientText
+            colors={['#fff', '#7DD3FC', '#A78BFA', '#fff']}
+            style={{ fontWeight: 700, fontSize: 16 }}
+          >
+            AI 코스 추천
+          </AnimatedGradientText>
           <div style={{ fontSize: 12, opacity: 0.85 }}>경북 맞춤형 여행 플래너</div>
         </div>
-        <div style={{
-          marginLeft: 'auto', padding: '4px 10px', borderRadius: 20,
-          background: 'rgba(255,255,255,0.2)', fontSize: 11, fontWeight: 500
-        }}>
+        <motion.div
+          style={{
+            marginLeft: 'auto', padding: '4px 10px', borderRadius: 20,
+            background: 'rgba(255,255,255,0.2)', fontSize: 11, fontWeight: 500,
+            position: 'relative', zIndex: 1,
+          }}
+          animate={{ opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
           <i className="fa-solid fa-bolt" style={{ marginRight: 4 }}></i>Powered by AI
-        </div>
+        </motion.div>
       </div>
 
       {/* Messages */}
@@ -82,41 +104,59 @@ export default function AiRecommend() {
         flex: 1, overflowY: 'auto', padding: '16px 16px 8px',
         display: 'flex', flexDirection: 'column', gap: 12
       }}>
-        {messages.map((msg) => {
-          const text = getTextFromParts(msg.parts)
-          if (!text) return null
-          return (
-            <div key={msg.id} style={{
-              display: 'flex',
-              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-            }}>
-              {msg.role === 'assistant' && (
+        <AnimatePresence>
+          {messages.map((msg, idx) => {
+            const text = getTextFromParts(msg.parts)
+            if (!text) return null
+            return (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.3, delay: idx === messages.length - 1 ? 0.1 : 0 }}
+                style={{
+                  display: 'flex',
+                  justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                }}
+              >
+                {msg.role === 'assistant' && (
+                  <motion.div
+                    style={{
+                      width: 32, height: 32, borderRadius: '50%', marginRight: 8, flexShrink: 0,
+                      background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 14, color: 'white', marginTop: 2
+                    }}
+                    animate={idx === messages.length - 1 ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ duration: 1, repeat: 2 }}
+                  >
+                    🤖
+                  </motion.div>
+                )}
                 <div style={{
-                  width: 32, height: 32, borderRadius: '50%', marginRight: 8, flexShrink: 0,
-                  background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, color: 'white', marginTop: 2
-                }}>🤖</div>
-              )}
-              <div style={{
-                maxWidth: '80%', padding: '12px 16px', borderRadius: 16,
-                fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                ...(msg.role === 'user' ? {
-                  background: 'linear-gradient(135deg, #4A6CF7, #6C8CFF)',
-                  color: 'white', borderBottomRightRadius: 4
-                } : {
-                  background: 'white', color: '#1e293b',
-                  borderBottomLeftRadius: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-                })
-              }}>
-                {text}
-              </div>
-            </div>
-          )
-        })}
+                  maxWidth: '80%', padding: '12px 16px', borderRadius: 16,
+                  fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  ...(msg.role === 'user' ? {
+                    background: 'linear-gradient(135deg, #4A6CF7, #6C8CFF)',
+                    color: 'white', borderBottomRightRadius: 4
+                  } : {
+                    background: 'white', color: '#1e293b',
+                    borderBottomLeftRadius: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
+                  })
+                }}>
+                  {text}
+                </div>
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
 
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+          >
             <div style={{
               width: 32, height: 32, borderRadius: '50%',
               background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
@@ -125,42 +165,66 @@ export default function AiRecommend() {
             }}>🤖</div>
             <div style={{
               padding: '12px 16px', borderRadius: 16, background: 'white',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.08)', display: 'flex', gap: 4
+              boxShadow: '0 1px 3px rgba(0,0,0,0.08)', display: 'flex', gap: 6
             }}>
-              <span className="dot-bounce" style={{ animationDelay: '0s' }}>●</span>
-              <span className="dot-bounce" style={{ animationDelay: '0.15s' }}>●</span>
-              <span className="dot-bounce" style={{ animationDelay: '0.3s' }}>●</span>
+              {[0, 1, 2].map(i => (
+                <motion.span
+                  key={i}
+                  style={{ fontSize: 10, color: '#4A6CF7' }}
+                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.15 }}
+                >
+                  ●
+                </motion.span>
+              ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Quick Prompts */}
         {showQuickPrompts && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+          <StaggerContainer staggerDelay={0.1} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
             {quickPrompts.map((qp, i) => (
-              <button key={i} onClick={() => handleSend(qp.prompt)} style={{
-                padding: '12px 16px', borderRadius: 12, border: '1px solid #e2e8f0',
-                background: 'white', cursor: 'pointer', textAlign: 'left',
-                display: 'flex', alignItems: 'center', gap: 10,
-                transition: 'all 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-              }}
-              onMouseOver={e => { e.currentTarget.style.borderColor = '#4A6CF7'; e.currentTarget.style.background = '#f0f4ff' }}
-              onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = 'white' }}
-              >
-                <span style={{ fontSize: 22 }}>{qp.emoji}</span>
-                <span style={{ fontSize: 14, fontWeight: 500, color: '#334155' }}>{qp.label}</span>
-                <i className="fa-solid fa-chevron-right" style={{ marginLeft: 'auto', fontSize: 12, color: '#94a3b8' }}></i>
-              </button>
+              <StaggerItem key={i}>
+                <MagicCard
+                  style={{ padding: '12px 16px', cursor: 'pointer' }}
+                  glowColor="rgba(74,108,247,0.1)"
+                >
+                  <div
+                    onClick={() => handleSend(qp.prompt)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+                  >
+                    <motion.span
+                      style={{ fontSize: 22 }}
+                      whileHover={{ scale: 1.2, rotate: 10 }}
+                    >
+                      {qp.emoji}
+                    </motion.span>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: '#334155' }}>{qp.label}</span>
+                    <motion.i
+                      className="fa-solid fa-chevron-right"
+                      style={{ marginLeft: 'auto', fontSize: 12, color: '#94a3b8' }}
+                      animate={{ x: [0, 3, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  </div>
+                </MagicCard>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} style={{
-        padding: '12px 16px', borderTop: '1px solid #e2e8f0', background: 'white',
-        display: 'flex', gap: 8, alignItems: 'center'
-      }}>
+      <motion.form
+        onSubmit={handleSubmit}
+        style={{
+          padding: '12px 16px', borderTop: '1px solid #e2e8f0', background: 'white',
+          display: 'flex', gap: 8, alignItems: 'center'
+        }}
+        initial={{ y: 20 }}
+        animate={{ y: 0 }}
+      >
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -169,34 +233,28 @@ export default function AiRecommend() {
           style={{
             flex: 1, padding: '12px 16px', borderRadius: 24, border: '1px solid #e2e8f0',
             fontSize: 14, outline: 'none', background: '#f8fafc',
-            transition: 'border-color 0.2s'
+            transition: 'border-color 0.2s, box-shadow 0.2s'
           }}
-          onFocus={e => e.target.style.borderColor = '#4A6CF7'}
-          onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+          onFocus={e => { e.target.style.borderColor = '#4A6CF7'; e.target.style.boxShadow = '0 0 0 3px rgba(74,108,247,0.1)' }}
+          onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none' }}
         />
-        <button type="submit" disabled={isLoading || !input.trim()} style={{
-          width: 44, height: 44, borderRadius: '50%', border: 'none',
-          background: (!input.trim() || isLoading) ? '#cbd5e1' : 'linear-gradient(135deg, #4A6CF7, #6C8CFF)',
-          color: 'white', fontSize: 16, cursor: (!input.trim() || isLoading) ? 'default' : 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.2s', flexShrink: 0
-        }}>
+        <motion.button
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          whileHover={input.trim() && !isLoading ? { scale: 1.1 } : {}}
+          whileTap={input.trim() && !isLoading ? { scale: 0.9 } : {}}
+          style={{
+            width: 44, height: 44, borderRadius: '50%', border: 'none',
+            background: (!input.trim() || isLoading) ? '#cbd5e1' : 'linear-gradient(135deg, #4A6CF7, #6C8CFF)',
+            color: 'white', fontSize: 16, cursor: (!input.trim() || isLoading) ? 'default' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s', flexShrink: 0,
+            boxShadow: input.trim() && !isLoading ? '0 4px 12px rgba(74,108,247,0.3)' : 'none',
+          }}
+        >
           <i className={isLoading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-paper-plane'}></i>
-        </button>
-      </form>
-
-      <style>{`
-        @keyframes dotBounce {
-          0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-          40% { opacity: 1; transform: scale(1.2); }
-        }
-        .dot-bounce {
-          display: inline-block;
-          color: #4A6CF7;
-          font-size: 10px;
-          animation: dotBounce 1.2s infinite;
-        }
-      `}</style>
+        </motion.button>
+      </motion.form>
     </div>
   )
 }

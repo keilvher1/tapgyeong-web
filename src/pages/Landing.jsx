@@ -1,7 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import KakaoMap from '../components/KakaoMap'
 import { db, DEMO_USER_ID, getAll, getFiltered, getById, where, orderBy, limit } from '../lib/firebase'
+import {
+  AnimatedGradientText, NumberTicker, ShimmerButton, PulsatingButton,
+  BlurFade, MagicCard, Marquee, Particles, BorderBeam,
+  NeonGradientCard, SparklesText, StaggerContainer, StaggerItem,
+  AnimatedProgress, TypingAnimation,
+} from '../components/magicui'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -13,16 +20,11 @@ export default function Landing() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch popular spots for tag cloud
-        const spotsData = await getFiltered('tg_spots', limit(8))
-
-        // Fetch recent tag history (denormalized - spot info included)
-        const tagsData = await getFiltered('tg_tag_history', orderBy('tagged_at', 'desc'), limit(5))
-
-        // Fetch user data for map coloring progress
-        const userData = await getById('tg_users', DEMO_USER_ID)
-
-        // Update state with fetched data
+        const [spotsData, tagsData, userData] = await Promise.all([
+          getFiltered('tg_spots', limit(8)),
+          getFiltered('tg_tag_history', orderBy('tagged_at', 'desc'), limit(5)),
+          getById('tg_users', DEMO_USER_ID),
+        ])
         if (spotsData) setPopularSpots(spotsData)
         if (tagsData) setRecentTags(tagsData)
         if (userData) setMapProgress(userData.map_coloring_pct || 78)
@@ -32,273 +34,361 @@ export default function Landing() {
         setLoading(false)
       }
     }
-
     fetchData()
   }, [])
 
+  const tags = popularSpots.length > 0
+    ? popularSpots.map(s => `#${s.name}`)
+    : ['#석굴암', '#불국사', '#첨성대', '#대릉원', '#동궁과 월지', '#경주 고촌마을', '#황리단길', '#보문관광단지']
+
   return (
-    <div style={{ background: '#fff' }}>
-      {/* Hero */}
-      <section style={styles.hero}>
-        <div style={styles.heroInner}>
-          <div style={styles.badge}>
-            <i className="fa-solid fa-signal" style={{ fontSize: 12, color: '#fff' }} />
-            <i className="fa-solid fa-wifi" style={{ fontSize: 12, color: '#fff' }} />
-            <span>NFC 스마트 관광카드</span>
-          </div>
-          <h1 style={styles.heroTitle}>
-            탭 한 번으로,<br />경북 전역을 여행하다
-          </h1>
-          <p style={styles.heroSub}>
-            NFC 스마트카드 하나로 경주 · 안동 · 포항의<br />
-            관광지를 탐험하고 AI 맞춤 추천을 받아보세요
-          </p>
+    <div style={{ background: '#fff', overflow: 'hidden' }}>
 
-          {/* Real Kakao Map */}
-          <div style={styles.mapContainer}>
-            <KakaoMap
-              height={200}
-              center={{ lat: 36.1, lng: 129.0 }}
-              zoom={10}
-              markers="all"
-              style={{ borderRadius: 16, border: '2px solid rgba(255,255,255,0.2)' }}
-            />
-          </div>
+      {/* ═══ Hero Section ═══ */}
+      <section style={S.hero}>
+        <Particles count={40} color="rgba(255,255,255,0.5)" />
+        <div style={S.heroInner}>
 
-          <button style={styles.ctaPrimary} onClick={() => navigate('/login')}>
-            시작하기
-            <i className="fa-solid fa-chevron-right" style={{ fontSize: 14 }} />
-          </button>
+          {/* Badge */}
+          <BlurFade delay={0.1}>
+            <motion.div
+              style={S.badge}
+              animate={{ boxShadow: ['0 0 0 0 rgba(255,255,255,0.2)', '0 0 0 8px rgba(255,255,255,0)', '0 0 0 0 rgba(255,255,255,0)'] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            >
+              <i className="fa-solid fa-signal" style={{ fontSize: 11 }} />
+              <i className="fa-solid fa-wifi" style={{ fontSize: 11 }} />
+              <span>NFC 스마트 관광카드</span>
+            </motion.div>
+          </BlurFade>
 
-          <div style={styles.cityChips}>
-            {['경주', '안동', '포항'].map(c => (
-              <button key={c} style={styles.cityChip} onClick={() => navigate('/explore')}>
-                <i className="fa-solid fa-location-dot" style={{ fontSize: 11 }} /> {c}
-              </button>
-            ))}
-          </div>
+          {/* Animated Title */}
+          <BlurFade delay={0.2}>
+            <h1 style={S.heroTitle}>
+              <AnimatedGradientText
+                colors={['#fff', '#C7D2FE', '#BAE6FD', '#fff']}
+                style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.3, letterSpacing: '-0.5px' }}
+              >
+                탭 한 번으로,
+              </AnimatedGradientText>
+              <br />
+              <span style={{ color: '#fff', fontSize: 28, fontWeight: 900, lineHeight: 1.3 }}>경북 전역을 여행하다</span>
+            </h1>
+          </BlurFade>
+
+          {/* Typing subtitle */}
+          <BlurFade delay={0.35}>
+            <p style={S.heroSub}>
+              NFC 스마트카드 하나로 경주 · 안동 · 포항의<br />
+              관광지를 탐험하고{' '}
+              <TypingAnimation
+                texts={['AI 맞춤 추천', '스탬프 수집', '쿠폰 할인']}
+                speed={70}
+                pause={2500}
+                style={{ fontWeight: 600, color: '#fff' }}
+              />
+              을 받아보세요
+            </p>
+          </BlurFade>
+
+          {/* Map */}
+          <BlurFade delay={0.5}>
+            <div style={S.mapContainer}>
+              <BorderBeam borderRadius={16} color1="rgba(255,255,255,0.6)" color2="rgba(125,211,252,0.6)" duration={5}>
+                <KakaoMap
+                  height={190}
+                  center={{ lat: 36.1, lng: 129.0 }}
+                  zoom={10}
+                  markers="all"
+                  style={{ borderRadius: 14 }}
+                />
+              </BorderBeam>
+            </div>
+          </BlurFade>
+
+          {/* CTA Button */}
+          <BlurFade delay={0.6}>
+            <ShimmerButton
+              onClick={() => navigate('/login')}
+              bgColor="#fff"
+              shimmerColor="rgba(74,108,247,0.2)"
+              style={{ color: '#4A6CF7', fontSize: 16, fontWeight: 800, padding: '16px 36px', borderRadius: 50, marginBottom: 18 }}
+            >
+              시작하기
+              <i className="fa-solid fa-chevron-right" style={{ fontSize: 14 }} />
+            </ShimmerButton>
+          </BlurFade>
+
+          {/* City Chips */}
+          <BlurFade delay={0.7}>
+            <div style={S.cityChips}>
+              {[
+                { name: '경주', color: '#FBBF24' },
+                { name: '안동', color: '#34D399' },
+                { name: '포항', color: '#F472B6' },
+              ].map(c => (
+                <motion.button
+                  key={c.name}
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/explore')}
+                  style={{ ...S.cityChip, borderColor: c.color + '60' }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.color }} />
+                  {c.name}
+                </motion.button>
+              ))}
+            </div>
+          </BlurFade>
+
         </div>
       </section>
 
-      {/* Feature Cards */}
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>핵심 기능</h2>
-        <div style={styles.featureGrid}>
+      {/* ═══ Feature Cards ═══ */}
+      <section style={S.section}>
+        <BlurFade>
+          <h2 style={S.sectionTitle}>
+            <SparklesText style={{ fontSize: 17, fontWeight: 800, color: '#1A1A2E' }}>핵심 기능</SparklesText>
+          </h2>
+        </BlurFade>
+        <StaggerContainer style={S.featureGrid} staggerDelay={0.12}>
           {[
-            { icon: 'fa-hand-pointer', title: '스마트 터치', desc: 'NFC 태깅으로 관광지 정보를 즉시 확인' },
-            { icon: 'fa-wand-magic-sparkles', title: 'AI 추천', desc: '방문 패턴 기반 맞춤 관광지 추천' },
-            { icon: 'fa-map', title: '맵 컬러링', desc: '방문할수록 채워지는 나만의 경북 지도' },
+            { icon: 'fa-hand-pointer', title: '스마트 터치', desc: 'NFC 태깅으로 관광지 정보를 즉시 확인', color: '#4A6CF7' },
+            { icon: 'fa-wand-magic-sparkles', title: 'AI 추천', desc: '방문 패턴 기반 맞춤 관광지 추천', color: '#8B5CF6' },
+            { icon: 'fa-map', title: '맵 컬러링', desc: '방문할수록 채워지는 나만의 경북 지도', color: '#10B981' },
           ].map((f, i) => (
-            <div key={i} style={styles.featureCard}>
-              <div style={styles.featureIcon}>
-                <i className={`fa-solid ${f.icon}`} style={{ fontSize: 22, color: '#4A6CF7' }} />
+            <StaggerItem key={i}>
+              <MagicCard
+                glowColor={f.color + '18'}
+                style={{ padding: '22px 14px', textAlign: 'center' }}
+              >
+                <motion.div
+                  style={{ ...S.featureIcon, background: f.color + '12', color: f.color }}
+                  whileHover={{ rotate: [0, -8, 8, 0], scale: 1.1 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <i className={`fa-solid ${f.icon}`} style={{ fontSize: 22 }} />
+                </motion.div>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: '#1A1A2E', marginBottom: 4 }}>{f.title}</h3>
+                <p style={{ fontSize: 10, color: '#8888A8', lineHeight: 1.5 }}>{f.desc}</p>
+              </MagicCard>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      </section>
+
+      {/* ═══ Hot Destination ═══ */}
+      <section style={S.section}>
+        <BlurFade>
+          <h2 style={S.sectionTitle}>
+            <motion.span
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ display: 'inline-block', marginRight: 6 }}
+            >
+              🔥
+            </motion.span>
+            지금 인기 관광지
+          </h2>
+        </BlurFade>
+        <BlurFade delay={0.15}>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
+            style={S.hotCard}
+          >
+            <div style={S.hotImage}>
+              <Particles count={15} color="rgba(255,255,255,0.4)" />
+              <div style={S.hotOverlay}>
+                <motion.span
+                  style={S.hotBadge}
+                  animate={{ boxShadow: ['0 0 0 0 rgba(239,68,68,0.4)', '0 0 0 8px rgba(239,68,68,0)', '0 0 0 0 rgba(239,68,68,0)'] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <i className="fa-solid fa-fire" style={{ marginRight: 4 }} /> HOT
+                </motion.span>
+                <h3 style={S.hotTitle}>밤이 더 아름다운<br />경주 동궁과 월지</h3>
+                <p style={S.hotSub}>야간 조명이 빛나는 천년 신라의 궁궐</p>
               </div>
-              <h3 style={styles.featureTitle}>{f.title}</h3>
-              <p style={styles.featureDesc}>{f.desc}</p>
             </div>
-          ))}
-        </div>
+          </motion.div>
+        </BlurFade>
       </section>
 
-      {/* Hot Destination */}
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>
-          <i className="fa-solid fa-fire" style={{ fontSize: 16, color: '#EF4444', marginRight: 6 }} />
-          지금 인기 관광지
-        </h2>
-        <div style={styles.hotCard}>
-          <div style={styles.hotImage}>
-            <div style={styles.hotOverlay}>
-              <span style={styles.hotBadge}>
-                <i className="fa-solid fa-fire" style={{ marginRight: 4 }} />HOT
+      {/* ═══ Real-time Tags (Marquee) ═══ */}
+      <section style={S.section}>
+        <BlurFade>
+          <h2 style={S.sectionTitle}>
+            <i className="fa-solid fa-arrow-trend-up" style={{ fontSize: 14, color: '#4A6CF7', marginRight: 6 }} />
+            실시간 인기 태그
+          </h2>
+        </BlurFade>
+        <BlurFade delay={0.1}>
+          <Marquee speed={25} style={{ marginBottom: 10 }}>
+            {tags.slice(0, 4).map((tag, i) => (
+              <motion.span
+                key={i}
+                whileHover={{ scale: 1.08, y: -2 }}
+                style={{
+                  ...S.tag,
+                  background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
+                  color: '#fff', fontWeight: 600,
+                  boxShadow: '0 2px 10px rgba(74,108,247,0.2)',
+                }}
+              >
+                <i className="fa-solid fa-hashtag" style={{ fontSize: 9, marginRight: 3, opacity: 0.7 }} />
+                {tag.replace('#', '')}
+              </motion.span>
+            ))}
+          </Marquee>
+          <Marquee speed={20} direction="right">
+            {tags.slice(4).map((tag, i) => (
+              <motion.span
+                key={i}
+                whileHover={{ scale: 1.08, y: -2 }}
+                style={{
+                  ...S.tag,
+                  background: '#F0F2F8',
+                  color: '#4A4A6A',
+                }}
+              >
+                {tag}
+              </motion.span>
+            ))}
+          </Marquee>
+        </BlurFade>
+      </section>
+
+      {/* ═══ Map Progress ═══ */}
+      <section style={S.section}>
+        <BlurFade>
+          <NeonGradientCard neonColors={['#4A6CF7', '#7DD3FC']} style={{ padding: 22, borderRadius: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A2E' }}>
+                <i className="fa-solid fa-palette" style={{ marginRight: 6, color: '#4A6CF7' }} />
+                맵 컬러링 진행률
               </span>
-              <h3 style={styles.hotTitle}>밤이 더 아름다운<br/>경주 동궁과 월지</h3>
-              <p style={styles.hotSub}>야간 조명이 빛나는 천년 신라의 궁궐</p>
+              <span style={{ fontSize: 26, fontWeight: 800 }}>
+                <AnimatedGradientText colors={['#4A6CF7', '#7DD3FC', '#4A6CF7']}>
+                  {mapProgress != null ? (
+                    <NumberTicker value={mapProgress} suffix="%" duration={2} />
+                  ) : '...%'}
+                </AnimatedGradientText>
+              </span>
             </div>
-          </div>
-        </div>
+            <AnimatedProgress value={mapProgress ?? 0} max={100} color="#4A6CF7" height={10} />
+            <p style={{ fontSize: 12, color: '#8888A8', marginTop: 10 }}>
+              경북 탐험 완주까지 <strong style={{ color: '#4A6CF7' }}>{mapProgress != null ? 100 - mapProgress : '...'}%</strong> 남았어요!
+            </p>
+          </NeonGradientCard>
+        </BlurFade>
       </section>
 
-      {/* Real-time Tags */}
-      <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>
-          <i className="fa-solid fa-arrow-trend-up" style={{ fontSize: 14, color: '#4A6CF7', marginRight: 6 }} />
-          실시간 인기 태그
-        </h2>
-        <div style={styles.tagCloud}>
-          {(popularSpots.length > 0
-            ? popularSpots.map(s => `#${s.name}`)
-            : ['#불국사', '#하회마을', '#호미곶', '#첨성대', '#안동찜닭', '#영일대', '#동궁과월지', '#도산서원']
-          ).map((tag, i) => (
-            <span key={i} style={{
-              ...styles.tag,
-              background: i < 3 ? 'linear-gradient(135deg, #4A6CF7, #7DD3FC)' : '#F0F2F8',
-              color: i < 3 ? '#fff' : '#4A4A6A',
-              fontWeight: i < 3 ? 600 : 400,
-            }}>
-              {i < 3 && <i className="fa-solid fa-hashtag" style={{ fontSize: 10, marginRight: 2 }} />}
-              {tag}
-            </span>
-          ))}
-        </div>
+      {/* ═══ CTA ═══ */}
+      <section style={{ ...S.section, paddingBottom: 32 }}>
+        <BlurFade>
+          <PulsatingButton
+            onClick={() => navigate('/ai')}
+            pulseColor="#4A6CF7"
+            style={{
+              width: '100%', justifyContent: 'center', gap: 10,
+              padding: '17px', borderRadius: 16, fontSize: 16,
+              background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)',
+              boxShadow: '0 6px 24px rgba(74,108,247,0.3)',
+            }}
+          >
+            <i className="fa-solid fa-wand-magic-sparkles" style={{ fontSize: 16 }} />
+            AI 추천 받으러 가기
+          </PulsatingButton>
+        </BlurFade>
       </section>
 
-      {/* Map Coloring Progress */}
-      <section style={styles.section}>
-        <div style={styles.progressCard}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>
-              <i className="fa-solid fa-palette" style={{ marginRight: 6 }} />
-              맵 컬러링 진행률
-            </span>
-            <span style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{mapProgress ?? '...'}%</span>
+      {/* ═══ Footer ═══ */}
+      <footer style={S.footer}>
+        <BlurFade>
+          <div style={{ fontSize: 16, fontWeight: 800 }}>
+            <AnimatedGradientText>
+              <i className="fa-solid fa-location-dot" style={{ marginRight: 5 }} />
+              TapGyeong 탭경
+            </AnimatedGradientText>
           </div>
-          <div style={styles.progressBar}>
-            <div style={{ ...styles.progressFill, width: `${mapProgress ?? 0}%` }} />
-          </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 8 }}>
-            경북 탐험 완주까지 {mapProgress != null ? 100 - mapProgress : '...'}% 남았어요!
+          <p style={{ fontSize: 11, color: '#A0A0B8', marginTop: 6 }}>
+            NFC 스마트 관광카드 · 2026 관광데이터 활용 공모전
           </p>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section style={{ ...styles.section, paddingBottom: 40 }}>
-        <button style={styles.ctaFull} onClick={() => navigate('/recommend')}>
-          <i className="fa-solid fa-wand-magic-sparkles" style={{ fontSize: 16 }} />
-          AI 추천 받으러 가기
-        </button>
-      </section>
-
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#4A6CF7' }}>
-          <i className="fa-solid fa-location-dot" style={{ marginRight: 4 }} />
-          TapGyeong 탭경
-        </div>
-        <p style={{ fontSize: 11, color: '#A0A0B8', marginTop: 4 }}>
-          NFC 스마트 관광카드 · 2026 관광데이터 활용 공모전
-        </p>
-        <p style={{ fontSize: 10, color: '#C0C0D0', marginTop: 8 }}>
-          팀 탐경 | 한국관광공사 OpenAPI 활용
-        </p>
+          <p style={{ fontSize: 10, color: '#C0C0D0', marginTop: 6 }}>
+            팀 탐경 | 한국관광공사 OpenAPI 활용
+          </p>
+        </BlurFade>
       </footer>
     </div>
   )
 }
 
-const styles = {
+/* ─── Styles ─── */
+const S = {
   hero: {
-    background: 'linear-gradient(160deg, #1E3A8A 0%, #4A6CF7 40%, #7DD3FC 100%)',
-    padding: '48px 24px 32px',
+    background: 'linear-gradient(160deg, #0F172A 0%, #1E3A8A 30%, #4A6CF7 60%, #7DD3FC 100%)',
+    padding: '52px 24px 36px',
     textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden',
   },
   heroInner: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    position: 'relative', zIndex: 1,
   },
   badge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    background: 'rgba(255,255,255,0.15)',
-    backdropFilter: 'blur(8px)',
-    borderRadius: 20,
-    padding: '6px 14px',
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: 500,
-    marginBottom: 16,
+    display: 'inline-flex', alignItems: 'center', gap: 6,
+    background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    borderRadius: 24, padding: '7px 16px',
+    fontSize: 12, color: '#fff', fontWeight: 500, marginBottom: 18,
   },
-  heroTitle: {
-    fontSize: 26,
-    fontWeight: 800,
-    color: '#fff',
-    lineHeight: 1.35,
-    marginBottom: 12,
-    letterSpacing: '-0.5px',
-  },
+  heroTitle: { marginBottom: 14 },
   heroSub: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.8)',
-    lineHeight: 1.6,
-    marginBottom: 20,
+    fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: 22,
   },
-  mapContainer: {
-    margin: '8px 0 24px',
-    width: '100%',
-  },
-  ctaPrimary: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    background: '#fff',
-    color: '#4A6CF7',
-    fontSize: 15,
-    fontWeight: 700,
-    padding: '14px 28px',
-    borderRadius: 50,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-    marginBottom: 16,
-  },
-  cityChips: { display: 'flex', gap: 8 },
+  mapContainer: { margin: '0 0 24px', width: '100%' },
+  cityChips: { display: 'flex', gap: 10 },
   cityChip: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-    background: 'rgba(255,255,255,0.2)',
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 500,
-    padding: '8px 14px',
-    borderRadius: 20,
-    backdropFilter: 'blur(8px)',
+    display: 'flex', alignItems: 'center', gap: 6,
+    background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    color: '#fff', fontSize: 12, fontWeight: 500,
+    padding: '8px 16px', borderRadius: 24,
+    cursor: 'pointer',
   },
-  section: { padding: '24px 20px' },
+  section: { padding: '26px 20px' },
   sectionTitle: {
-    fontSize: 17,
-    fontWeight: 700,
-    color: '#1A1A2E',
-    marginBottom: 16,
-    display: 'flex',
-    alignItems: 'center',
+    fontSize: 17, fontWeight: 800, color: '#1A1A2E',
+    marginBottom: 16, display: 'flex', alignItems: 'center',
   },
   featureGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 },
-  featureCard: { background: '#F8F9FE', borderRadius: 14, padding: '20px 12px', textAlign: 'center' },
   featureIcon: {
-    width: 48, height: 48, borderRadius: 14, background: '#EBF0FF',
+    width: 50, height: 50, borderRadius: 14,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    margin: '0 auto 10px',
+    margin: '0 auto 12px',
   },
-  featureTitle: { fontSize: 13, fontWeight: 700, color: '#1A1A2E', marginBottom: 4 },
-  featureDesc: { fontSize: 10, color: '#8888A8', lineHeight: 1.4 },
-  hotCard: { borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' },
+  hotCard: { borderRadius: 20, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' },
   hotImage: {
-    height: 200,
-    background: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #0EA5E9 100%)',
-    position: 'relative',
+    height: 210, position: 'relative',
+    background: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 40%, #3B82F6 70%, #0EA5E9 100%)',
   },
   hotOverlay: {
-    position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20,
-    background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
+    position: 'absolute', bottom: 0, left: 0, right: 0, padding: 22,
+    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
   },
   hotBadge: {
-    display: 'inline-block', background: '#EF4444', color: '#fff',
-    fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 4, marginBottom: 8,
+    display: 'inline-flex', alignItems: 'center',
+    background: '#EF4444', color: '#fff',
+    fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 6, marginBottom: 10,
   },
-  hotTitle: { fontSize: 18, fontWeight: 700, color: '#fff', lineHeight: 1.4, marginBottom: 4 },
+  hotTitle: { fontSize: 19, fontWeight: 800, color: '#fff', lineHeight: 1.4, marginBottom: 6 },
   hotSub: { fontSize: 12, color: 'rgba(255,255,255,0.8)' },
-  tagCloud: { display: 'flex', flexWrap: 'wrap', gap: 8 },
-  tag: { display: 'inline-flex', alignItems: 'center', fontSize: 13, padding: '8px 14px', borderRadius: 20 },
-  progressCard: { background: 'linear-gradient(135deg, #4A6CF7, #60A5FA)', borderRadius: 16, padding: 20 },
-  progressBar: { height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.25)', overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4, background: '#fff', transition: 'width 0.6s ease' },
-  ctaFull: {
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-    width: '100%', background: 'linear-gradient(135deg, #4A6CF7, #7DD3FC)', color: '#fff',
-    fontSize: 15, fontWeight: 700, padding: '16px', borderRadius: 14,
-    boxShadow: '0 4px 16px rgba(74,108,247,0.3)',
+  tag: {
+    display: 'inline-flex', alignItems: 'center',
+    fontSize: 13, padding: '9px 16px', borderRadius: 24,
+    cursor: 'pointer', whiteSpace: 'nowrap',
   },
-  footer: { textAlign: 'center', padding: '24px 20px 32px', borderTop: '1px solid #F0F0F5' },
+  footer: { textAlign: 'center', padding: '28px 20px 36px', borderTop: '1px solid #F0F0F5' },
 }
