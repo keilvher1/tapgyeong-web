@@ -16,121 +16,107 @@ const TABS = [
   { id: 'logs', icon: 'fa-bug', label: '로그' },
 ]
 
-// ─── 반응형 훅 ──────────────────────────────────
-function useIsMobile(breakpoint = 640) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint)
-  useEffect(() => {
-    const h = () => setIsMobile(window.innerWidth < breakpoint)
-    window.addEventListener('resize', h)
-    return () => window.removeEventListener('resize', h)
-  }, [breakpoint])
-  return isMobile
+// ─── 반응형 CSS (미디어쿼리) ──────────────────────
+const ADMIN_RESPONSIVE_CSS = `
+@media (max-width: 640px) {
+  .admin-layout { flex-direction: column !important; }
+  .admin-sidebar {
+    width: 100% !important; flex-direction: row !important;
+    overflow-x: auto !important; padding: 10px 8px 0 !important;
+    gap: 2px !important; -webkit-overflow-scrolling: touch;
+  }
+  .admin-sidebar .admin-brand { display: none !important; }
+  .admin-side-btn {
+    padding: 8px 12px !important; font-size: 11px !important;
+    white-space: nowrap !important; border-radius: 8px 8px 0 0 !important;
+    gap: 4px !important;
+  }
+  .admin-main { padding: 12px !important; max-height: none !important; }
+  .admin-stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+  .admin-stat-card { padding: 14px !important; gap: 10px !important; }
+  .admin-stat-card .stat-icon { width: 36px !important; height: 36px !important; font-size: 14px !important; }
+  .admin-stat-card .stat-value { font-size: 18px !important; }
+  .admin-stat-card .stat-label { font-size: 10px !important; }
+  .admin-panel-grid { grid-template-columns: 1fr !important; }
+  .admin-table-wrap { overflow-x: auto !important; padding: 10px !important; }
+  .admin-table-wrap table { min-width: 500px !important; }
+  .admin-form-grid { grid-template-columns: 1fr !important; }
+  .admin-toolbar { flex-wrap: wrap !important; gap: 8px !important; }
+  .admin-toolbar-btns { flex-wrap: wrap !important; gap: 6px !important; }
+  .admin-auth-card { width: 90% !important; padding: 30px 20px !important; }
 }
+`
 
 // ─── 관리자 메인 ───────────────────────────────────
 export default function Admin() {
   const [tab, setTab] = useState('dashboard')
   const [authd, setAuthd] = useState(false)
   const [pw, setPw] = useState('')
-  const isMobile = useIsMobile()
 
   // 간단한 관리자 인증 (프로토타입용)
   if (!authd) {
     return (
-      <div style={S.authWrap}>
-        <div style={{ ...S.authCard, width: isMobile ? '90%' : 360 }}>
-          <i className="fa-solid fa-shield-halved" style={{ fontSize: 36, color: '#4A6CF7', marginBottom: 16 }} />
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A2E', marginBottom: 8 }}>관리자 로그인</h2>
-          <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>TapGyeong 관리자 페이지</p>
-          <input
-            type="password" placeholder="관리자 비밀번호"
-            value={pw} onChange={e => setPw(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && (pw === 'tapgyeong2026' ? setAuthd(true) : alert('비밀번호가 틀렸습니다.'))}
-            style={S.input}
-          />
-          <button
-            onClick={() => pw === 'tapgyeong2026' ? setAuthd(true) : alert('비밀번호가 틀렸습니다.')}
-            style={S.primaryBtn}
-          >로그인</button>
-          <p style={{ fontSize: 11, color: '#bbb', marginTop: 12 }}>힌트: tapgyeong2026</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (isMobile) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#F0F2F8' }}>
-        {/* 모바일: 상단 헤더 + 수평 탭 */}
-        <div style={{ background: '#1E293B', padding: '14px 16px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div>
-              <h1 style={{ fontSize: 15, fontWeight: 800, color: '#fff', margin: 0 }}>TapGyeong</h1>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Admin Console</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 0, WebkitOverflowScrolling: 'touch' }}>
-            {TABS.map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{
-                padding: '8px 12px', border: 'none', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                whiteSpace: 'nowrap', borderRadius: '8px 8px 0 0',
-                background: tab === t.id ? '#F0F2F8' : 'transparent',
-                color: tab === t.id ? '#1A1A2E' : 'rgba(255,255,255,0.6)',
-              }}>
-                <i className={`fa-solid ${t.icon}`} style={{ marginRight: 4 }} />
-                {t.label}
-              </button>
-            ))}
+      <>
+        <style>{ADMIN_RESPONSIVE_CSS}</style>
+        <div style={S.authWrap}>
+          <div className="admin-auth-card" style={S.authCard}>
+            <i className="fa-solid fa-shield-halved" style={{ fontSize: 36, color: '#4A6CF7', marginBottom: 16 }} />
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1A1A2E', marginBottom: 8 }}>관리자 로그인</h2>
+            <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>TapGyeong 관리자 페이지</p>
+            <input
+              type="password" placeholder="관리자 비밀번호"
+              value={pw} onChange={e => setPw(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && (pw === 'tapgyeong2026' ? setAuthd(true) : alert('비밀번호가 틀렸습니다.'))}
+              style={S.input}
+            />
+            <button
+              onClick={() => pw === 'tapgyeong2026' ? setAuthd(true) : alert('비밀번호가 틀렸습니다.')}
+              style={S.primaryBtn}
+            >로그인</button>
+            <p style={{ fontSize: 11, color: '#bbb', marginTop: 12 }}>힌트: tapgyeong2026</p>
           </div>
         </div>
-
-        {/* 모바일 콘텐츠 */}
-        <main style={{ padding: 12, overflowY: 'auto' }}>
-          {tab === 'dashboard' && <Dashboard isMobile />}
-          {tab === 'spots' && <SpotsManager isMobile />}
-          {tab === 'users' && <UsersManager isMobile />}
-          {tab === 'tags' && <TagHistory isMobile />}
-          {tab === 'coupons' && <CouponsManager isMobile />}
-          {tab === 'logs' && <LogViewer isMobile />}
-        </main>
-      </div>
+      </>
     )
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F0F2F8' }}>
-      {/* Sidebar */}
-      <aside style={S.sidebar}>
-        <div style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <h1 style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>TapGyeong</h1>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Admin Console</p>
-        </div>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            ...S.sideBtn, background: tab === t.id ? 'rgba(255,255,255,0.15)' : 'transparent',
-            color: tab === t.id ? '#fff' : 'rgba(255,255,255,0.6)',
-          }}>
-            <i className={`fa-solid ${t.icon}`} style={{ width: 20, textAlign: 'center' }} />
-            {t.label}
-          </button>
-        ))}
-      </aside>
+    <>
+      <style>{ADMIN_RESPONSIVE_CSS}</style>
+      <div className="admin-layout" style={{ display: 'flex', minHeight: '100vh', background: '#F0F2F8' }}>
+        {/* Sidebar */}
+        <aside className="admin-sidebar" style={S.sidebar}>
+          <div className="admin-brand" style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <h1 style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>TapGyeong</h1>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Admin Console</p>
+          </div>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} className="admin-side-btn" style={{
+              ...S.sideBtn, background: tab === t.id ? 'rgba(255,255,255,0.15)' : 'transparent',
+              color: tab === t.id ? '#fff' : 'rgba(255,255,255,0.6)',
+            }}>
+              <i className={`fa-solid ${t.icon}`} style={{ width: 20, textAlign: 'center' }} />
+              {t.label}
+            </button>
+          ))}
+        </aside>
 
-      {/* Main Content */}
-      <main style={{ flex: 1, padding: 24, overflowY: 'auto', maxHeight: '100vh' }}>
-        {tab === 'dashboard' && <Dashboard />}
-        {tab === 'spots' && <SpotsManager />}
-        {tab === 'users' && <UsersManager />}
-        {tab === 'tags' && <TagHistory />}
-        {tab === 'coupons' && <CouponsManager />}
-        {tab === 'logs' && <LogViewer />}
-      </main>
-    </div>
+        {/* Main Content */}
+        <main className="admin-main" style={{ flex: 1, padding: 24, overflowY: 'auto', maxHeight: '100vh' }}>
+          {tab === 'dashboard' && <Dashboard />}
+          {tab === 'spots' && <SpotsManager />}
+          {tab === 'users' && <UsersManager />}
+          {tab === 'tags' && <TagHistory />}
+          {tab === 'coupons' && <CouponsManager />}
+          {tab === 'logs' && <LogViewer />}
+        </main>
+      </div>
+    </>
   )
 }
 
 // ─── 대시보드 ─────────────────────────────────────
-function Dashboard({ isMobile }) {
+function Dashboard() {
   const [stats, setStats] = useState(null)
   const [recentTags, setRecentTags] = useState([])
 
@@ -186,22 +172,22 @@ function Dashboard({ isMobile }) {
   return (
     <div>
       <h2 style={S.pageTitle}>대시보드</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: isMobile ? 10 : 16, marginBottom: 24 }}>
+      <div className="admin-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {statCards.map((c, i) => (
-          <div key={i} style={{ ...S.statCard, padding: isMobile ? 14 : 20, gap: isMobile ? 10 : 14 }}>
-            <div style={{ ...S.statIcon, background: c.color + '15', color: c.color, ...(isMobile ? { width: 36, height: 36, fontSize: 14 } : {}) }}>
+          <div key={i} className="admin-stat-card" style={S.statCard}>
+            <div className="stat-icon" style={{ ...S.statIcon, background: c.color + '15', color: c.color }}>
               <i className={`fa-solid ${c.icon}`} />
             </div>
             <div>
-              <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 800, color: '#1A1A2E' }}>{c.value}</div>
-              <div style={{ fontSize: isMobile ? 10 : 12, color: '#888' }}>{c.label}</div>
+              <div className="stat-value" style={{ fontSize: 22, fontWeight: 800, color: '#1A1A2E' }}>{c.value}</div>
+              <div className="stat-label" style={{ fontSize: 12, color: '#888' }}>{c.label}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* 도시별 태깅 분포 */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+      <div className="admin-panel-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div style={S.panel}>
           <h3 style={S.panelTitle}>도시별 태깅 분포</h3>
           {Object.entries(stats.cityBreakdown).map(([city, count]) => (
@@ -237,7 +223,7 @@ function Dashboard({ isMobile }) {
 }
 
 // ─── 관광지 관리 ──────────────────────────────────
-function SpotsManager({ isMobile }) {
+function SpotsManager() {
   const [spots, setSpots] = useState([])
   const [editing, setEditing] = useState(null) // null | 'new' | spot object
   const [form, setForm] = useState({ name: '', city: '경주', category: '문화유산', lat: '', lng: '', description: '' })
@@ -303,7 +289,7 @@ function SpotsManager({ isMobile }) {
       {editing && (
         <div style={{ ...S.panel, marginBottom: 20 }}>
           <h3 style={S.panelTitle}>{editing === 'new' ? '관광지 추가' : '관광지 수정'}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
+          <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={S.label}>이름</label>
               <input style={S.input} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
@@ -340,8 +326,8 @@ function SpotsManager({ isMobile }) {
         </div>
       )}
 
-      <div style={{ ...S.panel, ...(isMobile ? { padding: 10, overflowX: 'auto' } : {}) }}>
-        <table style={{ ...S.table, minWidth: isMobile ? 600 : 'auto' }}>
+      <div className="admin-table-wrap" style={S.panel}>
+        <table style={S.table}>
           <thead>
             <tr>
               <th style={S.th}>ID</th><th style={S.th}>이름</th><th style={S.th}>도시</th>
@@ -378,7 +364,7 @@ function SpotsManager({ isMobile }) {
 }
 
 // ─── 유저 관리 ────────────────────────────────────
-function UsersManager({ isMobile }) {
+function UsersManager() {
   const [users, setUsers] = useState([])
 
   useEffect(() => {
@@ -388,8 +374,8 @@ function UsersManager({ isMobile }) {
   return (
     <div>
       <h2 style={S.pageTitle}>유저 관리 ({users.length})</h2>
-      <div style={{ ...S.panel, ...(isMobile ? { padding: 10, overflowX: 'auto' } : {}) }}>
-        <table style={{ ...S.table, minWidth: isMobile ? 600 : 'auto' }}>
+      <div className="admin-table-wrap" style={S.panel}>
+        <table style={S.table}>
           <thead>
             <tr>
               <th style={S.th}>ID</th><th style={S.th}>닉네임</th><th style={S.th}>레벨</th>
@@ -423,7 +409,7 @@ function UsersManager({ isMobile }) {
 }
 
 // ─── 태그 이력 ────────────────────────────────────
-function TagHistory({ isMobile }) {
+function TagHistory() {
   const [tags, setTags] = useState([])
   const [filterCity, setFilterCity] = useState('all')
 
@@ -437,7 +423,7 @@ function TagHistory({ isMobile }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+      <div className="admin-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={S.pageTitle}>태그 이력 ({filtered.length})</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           {['all', '경주', '안동', '포항'].map(c => (
@@ -450,8 +436,8 @@ function TagHistory({ isMobile }) {
           ))}
         </div>
       </div>
-      <div style={{ ...S.panel, ...(isMobile ? { padding: 10, overflowX: 'auto' } : {}) }}>
-        <table style={{ ...S.table, minWidth: isMobile ? 500 : 'auto' }}>
+      <div className="admin-table-wrap" style={S.panel}>
+        <table style={S.table}>
           <thead>
             <tr>
               <th style={S.th}>시간</th><th style={S.th}>유저</th><th style={S.th}>관광지</th>
@@ -476,7 +462,7 @@ function TagHistory({ isMobile }) {
 }
 
 // ─── 쿠폰 관리 ───────────────────────────────────
-function CouponsManager({ isMobile }) {
+function CouponsManager() {
   const [coupons, setCoupons] = useState([])
 
   useEffect(() => {
@@ -493,8 +479,8 @@ function CouponsManager({ isMobile }) {
   return (
     <div>
       <h2 style={S.pageTitle}>쿠폰 관리 ({coupons.length})</h2>
-      <div style={{ ...S.panel, ...(isMobile ? { padding: 10, overflowX: 'auto' } : {}) }}>
-        <table style={{ ...S.table, minWidth: isMobile ? 550 : 'auto' }}>
+      <div className="admin-table-wrap" style={S.panel}>
+        <table style={S.table}>
           <thead>
             <tr>
               <th style={S.th}>제목</th><th style={S.th}>할인</th><th style={S.th}>유저</th>
@@ -532,7 +518,7 @@ function CouponsManager({ isMobile }) {
 }
 
 // ─── 로그 뷰어 ───────────────────────────────────
-function LogViewer({ isMobile }) {
+function LogViewer() {
   const [logs, setLogs] = useState([])
   const [filterLevel, setFilterLevel] = useState('all')
   const [source, setSource] = useState('firestore') // 'memory' | 'firestore'
@@ -560,23 +546,22 @@ function LogViewer({ isMobile }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+      <div className="admin-toolbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={S.pageTitle}>에러 로그 ({filtered.length})</h2>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <select value={source} onChange={e => setSource(e.target.value)} style={{ ...S.input, width: 'auto', padding: '6px 10px', fontSize: 12 }}>
-            <option value="firestore">Firestore</option>
-            <option value="memory">메모리</option>
+        <div className="admin-toolbar-btns" style={{ display: 'flex', gap: 8 }}>
+          <select value={source} onChange={e => setSource(e.target.value)} style={{ ...S.input, width: 'auto', padding: '6px 12px' }}>
+            <option value="firestore">Firestore 로그</option>
+            <option value="memory">메모리 로그</option>
           </select>
           {['all', 'error', 'warn', 'info'].map(l => (
             <button key={l} onClick={() => setFilterLevel(l)} style={{
               ...S.filterBtn, background: filterLevel === l ? (levelColors[l] || '#4A6CF7') : '#fff',
               color: filterLevel === l ? '#fff' : '#666',
-              padding: isMobile ? '5px 10px' : '6px 14px',
             }}>
               {l === 'all' ? '전체' : l.toUpperCase()}
             </button>
           ))}
-          <button onClick={loadLogs} style={{ ...S.secondaryBtn, padding: isMobile ? '6px 12px' : '10px 20px' }}>
+          <button onClick={loadLogs} style={S.secondaryBtn}>
             <i className="fa-solid fa-rotate" style={{ marginRight: 4 }} /> 새로고침
           </button>
         </div>
