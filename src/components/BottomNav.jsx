@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 const tabs = [
   { path: '/', icon: 'fa-house', label: '홈' },
-  { path: '/recommend', icon: 'fa-wand-magic-sparkles', label: 'AI추천' },
+  { path: '/ai', icon: 'fa-robot', label: 'AI추천' },
   { path: '/explore', icon: 'fa-map', label: '탐험' },
   { path: '/coupon', icon: 'fa-ticket', label: '쿠폰' },
   { path: '/mypage', icon: 'fa-user', label: 'MY' },

@@ -7,6 +7,7 @@ import MyPage from './pages/MyPage'
 import Recommend from './pages/Recommend'
 import ExploreMap from './pages/ExploreMap'
 import Coupon from './pages/Coupon'
+import AiRecommend from './pages/AiRecommend'
 
 function App() {
   const location = useLocation()
@@ -23,6 +24,7 @@ function App() {
           <Route path="/recommend" element={<Recommend />} />
           <Route path="/explore" element={<ExploreMap />} />
           <Route path="/coupon" element={<Coupon />} />
+          <Route path="/ai" element={<AiRecommend />} />
         </Routes>
       </div>
       {!hideNav && <BottomNav />}
