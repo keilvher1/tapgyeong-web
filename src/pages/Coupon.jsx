@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase, DEMO_USER_ID } from '../lib/supabase'
+import { DEMO_USER_ID, getFiltered, where } from '../lib/firebase'
 
 export default function Coupon() {
   const [activeTab, setActiveTab] = useState('available')
@@ -14,24 +14,18 @@ export default function Coupon() {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const { data, error } = await supabase
-          .from('tg_user_coupons')
-          .select('*, tg_coupons(title, discount, description, color, expiry_date)')
-          .eq('user_id', DEMO_USER_ID)
+        // Fetch denormalized user coupons from Firestore
+        const data = await getFiltered('tg_user_coupons', where('user_id', '==', DEMO_USER_ID))
 
-        if (error) throw error
-
-        // Map Supabase data to coupon card format
-        const mappedCoupons = (data || [])
-          .filter(uc => uc.tg_coupons)
-          .map(userCoupon => ({
-            id: userCoupon.coupon_id,
-            title: userCoupon.tg_coupons.title,
-            discount: userCoupon.tg_coupons.discount,
-            desc: userCoupon.tg_coupons.description,
-            expiry: (userCoupon.tg_coupons.expiry_date || '').replace(/-/g, '.'),
-            color: userCoupon.tg_coupons.color || '#4A6CF7',
-            status: userCoupon.status,
+        // Map Firestore data to coupon card format (denormalized)
+        const mappedCoupons = (data || []).map(uc => ({
+            id: uc.coupon_id,
+            title: uc.title,
+            discount: uc.discount,
+            desc: uc.description,
+            expiry: (uc.expiry_date || '').replace(/-/g, '.'),
+            color: uc.color || '#4A6CF7',
+            status: uc.status,
           }))
 
         setCoupons(mappedCoupons)

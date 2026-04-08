@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import KakaoMap from '../components/KakaoMap'
-import { supabase, DEMO_USER_ID } from '../lib/supabase'
+import { db, DEMO_USER_ID, getAll, getFiltered, getById, where, orderBy, limit } from '../lib/firebase'
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -14,24 +14,13 @@ export default function Landing() {
     const fetchData = async () => {
       try {
         // Fetch popular spots for tag cloud
-        const { data: spotsData } = await supabase
-          .from('tg_spots')
-          .select('*')
-          .limit(8)
+        const spotsData = await getFiltered('tg_spots', limit(8))
 
-        // Fetch recent tag history
-        const { data: tagsData } = await supabase
-          .from('tg_tag_history')
-          .select('*, tg_spots(name, city)')
-          .order('tagged_at', { ascending: false })
-          .limit(5)
+        // Fetch recent tag history (denormalized - spot info included)
+        const tagsData = await getFiltered('tg_tag_history', orderBy('tagged_at', 'desc'), limit(5))
 
         // Fetch user data for map coloring progress
-        const { data: userData } = await supabase
-          .from('tg_users')
-          .select('*')
-          .eq('id', DEMO_USER_ID)
-          .single()
+        const userData = await getById('tg_users', DEMO_USER_ID)
 
         // Update state with fetched data
         if (spotsData) setPopularSpots(spotsData)

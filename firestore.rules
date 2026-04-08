@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Prototype mode: allow all reads and writes
+    // TODO: Add proper authentication rules before production
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

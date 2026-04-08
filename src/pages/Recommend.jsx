@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import KakaoMap from '../components/KakaoMap'
-import { supabase } from '../lib/supabase'
+import { getAll } from '../lib/firebase'
 
 export default function Recommend() {
   const [activeFilter, setActiveFilter] = useState('전체')
@@ -24,20 +24,15 @@ export default function Recommend() {
     { name: '대릉원', dist: '0.8km', match: 83, cat: '문화유산', desc: '천년 왕국의 왕릉 군집', tag: '인기 스팟', emoji: '👑' },
   ]
 
-  // Fetch spots from Supabase
+  // Fetch spots from Firestore
   useEffect(() => {
     const fetchSpots = async () => {
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('tg_spots')
-          .select('*')
+        const data = await getAll('tg_spots')
 
-        if (error) {
-          console.error('Error fetching spots:', error)
-          setSpots(defaultSpots)
-        } else if (data && data.length > 0) {
-          // Transform Supabase data to component format
+        if (data && data.length > 0) {
+          // Transform Firestore data to component format
           const transformedSpots = data.map((spot) => ({
             id: spot.id,
             name: spot.name,

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase, DEMO_USER_ID } from '../lib/supabase'
+import { DEMO_USER_ID, getById } from '../lib/firebase'
 
 const KAKAO_JS_KEY = '0192783ba4afa37564a9e3ec7595b220'
 const KAKAO_REST_KEY = '39b318ede845f101187c8b3f9d33355c'
@@ -22,11 +22,7 @@ export default function Login() {
   const handleDemoLogin = async () => {
     setIsLoading(true)
     try {
-      const { data: user } = await supabase
-        .from('tg_users')
-        .select('*')
-        .eq('id', DEMO_USER_ID)
-        .single()
+      const user = await getById('tg_users', DEMO_USER_ID)
 
       if (user) {
         localStorage.setItem('tg_user', JSON.stringify(user))

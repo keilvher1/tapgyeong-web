@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase, DEMO_USER_ID } from '../lib/supabase'
+import { db, DEMO_USER_ID, getById, getFiltered, updateById, where } from '../lib/firebase'
 
 const KAKAO_REST_KEY = '39b318ede845f101187c8b3f9d33355c'
 const KAKAO_CLIENT_SECRET = 'isOdCkWBYgFehdfP9gjIWhrfLVWH3CyX'
@@ -64,39 +64,25 @@ export default function KakaoCallback() {
 
         setStatus('계정 연동 중...')
 
-        // Check if user exists in tg_users
-        const { data: existingUser } = await supabase
-          .from('tg_users')
-          .select('*')
-          .eq('kakao_id', kakaoId)
-          .single()
+        // Check if user exists in tg_users by kakao_id
+        const existingUsers = await getFiltered('tg_users', where('kakao_id', '==', kakaoId))
+        const existingUser = existingUsers.length > 0 ? existingUsers[0] : null
 
         let user
         if (existingUser) {
           user = existingUser
         } else {
-          // Create new user or update demo user
-          const { data: updatedUser, error: updateError } = await supabase
-            .from('tg_users')
-            .update({
+          // Update demo user with Kakao info
+          try {
+            await updateById('tg_users', DEMO_USER_ID, {
               kakao_id: kakaoId,
               nickname: nickname,
               profile_image: profileImage,
             })
-            .eq('id', DEMO_USER_ID)
-            .select()
-            .single()
-
-          if (updateError) {
+            user = await getById('tg_users', DEMO_USER_ID)
+          } catch (updateError) {
             // If update fails, just use demo user
-            const { data: demoUser } = await supabase
-              .from('tg_users')
-              .select('*')
-              .eq('id', DEMO_USER_ID)
-              .single()
-            user = demoUser
-          } else {
-            user = updatedUser
+            user = await getById('tg_users', DEMO_USER_ID)
           }
         }
 
@@ -113,11 +99,7 @@ export default function KakaoCallback() {
         setStatus('로그인 중 오류가 발생했습니다. 데모 모드로 전환합니다...')
 
         // Fallback to demo login
-        const { data: demoUser } = await supabase
-          .from('tg_users')
-          .select('*')
-          .eq('id', DEMO_USER_ID)
-          .single()
+        const demoUser = await getById('tg_users', DEMO_USER_ID)
 
         if (demoUser) {
           localStorage.setItem('tg_user', JSON.stringify(demoUser))

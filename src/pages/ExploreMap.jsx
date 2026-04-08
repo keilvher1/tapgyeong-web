@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import KakaoMap from '../components/KakaoMap'
-import { supabase, DEMO_USER_ID } from '../lib/supabase'
+import { db, DEMO_USER_ID, getAll, getFiltered, getById, where } from '../lib/firebase'
 
 export default function ExploreMap() {
   const [selectedCity, setSelectedCity] = useState('all')
@@ -32,29 +32,14 @@ export default function ExploreMap() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all spots
-        const { data: spots, error: spotsError } = await supabase
-          .from('tg_spots')
-          .select('*')
+        // Fetch all spots from Firestore
+        const spots = await getAll('tg_spots')
 
-        if (spotsError) throw spotsError
-
-        // Fetch user stamps
-        const { data: userStamps, error: stampsError } = await supabase
-          .from('tg_stamps')
-          .select('*, tg_spots(name, city, category)')
-          .eq('user_id', DEMO_USER_ID)
-
-        if (stampsError) throw stampsError
+        // Fetch user stamps (denormalized - spot info included)
+        const userStamps = await getFiltered('tg_stamps', where('user_id', '==', DEMO_USER_ID))
 
         // Fetch leaderboard data
-        const { data: leaderData, error: leaderError } = await supabase
-          .from('tg_leaderboard')
-          .select('*')
-          .eq('user_id', DEMO_USER_ID)
-          .single()
-
-        if (leaderError && leaderError.code !== 'PGRST116') throw leaderError
+        const leaderData = await getById('tg_leaderboard', DEMO_USER_ID)
 
         // Process stamps with unlocked status and emojis
         const unlockedSpotIds = new Set((userStamps || []).map(s => s.spot_id))
@@ -82,7 +67,7 @@ export default function ExploreMap() {
         })
 
         userStamps?.forEach(stamp => {
-          const city = stamp.tg_spots?.city
+          const city = stamp.spot_city
           if (city && cityMap[city]) {
             cityMap[city].visited += 1
           }

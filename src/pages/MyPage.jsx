@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase, DEMO_USER_ID } from '../lib/supabase'
+import { db, DEMO_USER_ID, getAll, getFiltered, getById, countDocs, where, orderBy, limit } from '../lib/firebase'
 
 const EMOJI_MAP = {
   '문화유산': '🏛️',
@@ -38,53 +38,35 @@ export default function MyPage() {
     async function fetchData() {
       try {
         // Fetch user data
-        const { data: userData, error: userError } = await supabase
-          .from('tg_users')
-          .select('*')
-          .eq('id', DEMO_USER_ID)
-          .single()
-
-        if (userError) throw userError
+        const userData = await getById('tg_users', DEMO_USER_ID)
+        if (!userData) throw new Error('User not found')
         setUser(userData)
 
-        // Fetch recent visits
-        const { data: visitData, error: visitError } = await supabase
-          .from('tg_tag_history')
-          .select('*, tg_spots(name, city, category)')
-          .eq('user_id', DEMO_USER_ID)
-          .order('tagged_at', { ascending: false })
-          .limit(5)
+        // Fetch recent visits (denormalized - spot info included)
+        const visitData = await getFiltered('tg_tag_history',
+          where('user_id', '==', DEMO_USER_ID),
+          orderBy('tagged_at', 'desc'),
+          limit(5)
+        )
 
-        if (visitError) throw visitError
         const visitsWithTime = (visitData || []).map((v) => ({
-          name: v.tg_spots?.name || '알 수 없음',
-          city: v.tg_spots?.city || '',
+          name: v.spot_name || '알 수 없음',
+          city: v.spot_city || '',
           time: getRelativeTime(v.tagged_at),
-          emoji: EMOJI_MAP[v.tg_spots?.category] || '📍',
+          emoji: EMOJI_MAP[v.spot_category] || '📍',
         }))
         setVisits(visitsWithTime)
 
-        // Fetch stamp count
-        const { count, error: stampError } = await supabase
-          .from('tg_stamps')
-          .select('id', { count: 'exact' })
-          .eq('user_id', DEMO_USER_ID)
-          .eq('unlocked', true)
-
-        if (stampError) throw stampError
-        setStampCount(count || 0)
+        // Fetch stamp count (unlocked stamps)
+        const unlockedStamps = await getFiltered('tg_stamps',
+          where('user_id', '==', DEMO_USER_ID),
+          where('unlocked', '==', true)
+        )
+        setStampCount(unlockedStamps.length)
 
         // Fetch gyeongju stamp progress
-        const { data: allStamps } = await supabase
-          .from('tg_stamps')
-          .select('*, tg_spots(city)')
-          .eq('user_id', DEMO_USER_ID)
-          .eq('unlocked', true)
-        const { count: gyeongjuTotal } = await supabase
-          .from('tg_spots')
-          .select('id', { count: 'exact' })
-          .eq('city', '경주')
-        const gjDone = (allStamps || []).filter(s => s.tg_spots?.city === '경주').length
+        const gjDone = unlockedStamps.filter(s => s.spot_city === '경주').length
+        const gyeongjuTotal = await countDocs('tg_spots', where('city', '==', '경주'))
         setGyeongjuStamps({ done: gjDone, total: gyeongjuTotal || 0 })
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -98,7 +80,7 @@ export default function MyPage() {
 
   const stats = [
     { icon: 'fa-tags', value: user?.total_tags?.toString() || '0', label: '총 태그', bg: '#EBF0FF', color: '#4A6CF7' },
-    { icon: 'fa-city', value: user?.visited_cities?.toString() || '0', label: '방문 도시', bg: '#ECFDF5', color: '#10B981' },
+    { icon: 'fa-city', value: (user?.visited_cities?.length || 0).toString(), label: '방문 도시', bg: '#ECFDF5', color: '#10B981' },
     { icon: 'fa-map', value: `${user?.map_coloring_pct || 0}%`, label: '맵컬러링', bg: '#FEF3C7', color: '#F59E0B' },
     { icon: 'fa-award', value: stampCount.toString(), label: '보유 스탬프', bg: '#FCE7F3', color: '#EC4899' },
   ]
