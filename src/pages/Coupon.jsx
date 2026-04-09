@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { DEMO_USER_ID, getFiltered, where } from '../lib/firebase'
 import {
   BlurFade, AnimatedGradientText, SparklesText, NumberTicker,
@@ -15,6 +15,7 @@ export default function Coupon() {
     { id: 3, title: '안동하회 금류봉 보길', discount: '2,000원 할인', desc: '입장권 2,000원 할인', expiry: '2026.04.30', color: '#F59E0B', status: 'available' },
     { id: 4, title: '불국사 기념품점', discount: '5% 할인', desc: '기념품 5% 할인 (사용완료)', expiry: '2026.03.15', color: '#9CA3AF', status: 'used' },
   ])
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

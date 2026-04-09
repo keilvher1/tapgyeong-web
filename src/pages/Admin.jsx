@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
-  db, getAll, getFiltered, getById, updateById, createDoc,
-  setById, removeById, countDocs, where, orderBy, limit, query,
-  collection, doc, writeBatch,
+  getAll, updateById,
+  setById, removeById,
 } from '../lib/firebase'
-import { getDocs } from 'firebase/firestore'
 import logger from '../lib/logger'
 
 const TABS = [
@@ -233,6 +231,7 @@ function SpotsManager() {
     setSpots(data.sort((a, b) => a.city.localeCompare(b.city) || a.name.localeCompare(b.name)))
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadSpots() }, [loadSpots])
 
   function openNew() {
@@ -523,11 +522,7 @@ function LogViewer() {
   const [filterLevel, setFilterLevel] = useState('all')
   const [source, setSource] = useState('firestore') // 'memory' | 'firestore'
 
-  useEffect(() => {
-    loadLogs()
-  }, [source])
-
-  async function loadLogs() {
+  const loadLogs = useCallback(async () => {
     if (source === 'memory') {
       setLogs(logger.getLogs().reverse())
     } else {
@@ -538,7 +533,12 @@ function LogViewer() {
         console.error('로그 로드 실패', err)
       }
     }
-  }
+  }, [source])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadLogs()
+  }, [loadLogs])
 
   const filtered = filterLevel === 'all' ? logs : logs.filter(l => l.level === filterLevel)
 

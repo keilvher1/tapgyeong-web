@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { db, DEMO_USER_ID, getById, getFiltered, updateById, where } from '../lib/firebase'
+import { DEMO_USER_ID, getById, getFiltered, updateById, where } from '../lib/firebase'
 
 const KAKAO_REST_KEY = '39b318ede845f101187c8b3f9d33355c'
 const KAKAO_CLIENT_SECRET = 'isOdCkWBYgFehdfP9gjIWhrfLVWH3CyX'
@@ -80,7 +80,7 @@ export default function KakaoCallback() {
               profile_image: profileImage,
             })
             user = await getById('tg_users', DEMO_USER_ID)
-          } catch (updateError) {
+          } catch {
             // If update fails, just use demo user
             user = await getById('tg_users', DEMO_USER_ID)
           }

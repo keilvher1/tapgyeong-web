@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import KakaoMap from '../components/KakaoMap'
-import { db, DEMO_USER_ID, getAll, getFiltered, getById, where, orderBy, limit } from '../lib/firebase'
+import { DEMO_USER_ID, getFiltered, getById, orderBy, limit } from '../lib/firebase'
 import {
   AnimatedGradientText, NumberTicker, ShimmerButton, PulsatingButton,
   BlurFade, MagicCard, Marquee, Particles, BorderBeam,
@@ -13,8 +12,10 @@ import {
 export default function Landing() {
   const navigate = useNavigate()
   const [popularSpots, setPopularSpots] = useState([])
+  // eslint-disable-next-line no-unused-vars
   const [recentTags, setRecentTags] = useState([])
   const [mapProgress, setMapProgress] = useState(null)
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

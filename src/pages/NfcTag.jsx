@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { isNfcSupported, startNfcReader, processNfcTag } from '../lib/nfc'
 import { getAll } from '../lib/firebase'
 import logger from '../lib/logger'
@@ -20,13 +20,6 @@ export default function NfcTag() {
   const [spots, setSpots] = useState([])
   const [simOpen, setSimOpen] = useState(false)
   const readerRef = useRef(null)
-
-  useEffect(() => {
-    setNfcAvailable(isNfcSupported())
-    getAll('tg_spots').then(setSpots).catch(() => {})
-    const spotId = paramSpotId || searchParams.get('spot')
-    if (spotId) handleTag(spotId)
-  }, [])
 
   async function handleTag(spotId) {
     setMode('processing')
@@ -58,6 +51,14 @@ export default function NfcTag() {
     setResult(null)
     setSimOpen(false)
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNfcAvailable(isNfcSupported())
+    getAll('tg_spots').then(setSpots).catch(() => {})
+    const spotId = paramSpotId || searchParams.get('spot')
+    if (spotId) handleTag(spotId)
+  }, [paramSpotId, searchParams])
 
   return (
     <div style={{ background: '#F5F7FB', minHeight: '100vh' }}>

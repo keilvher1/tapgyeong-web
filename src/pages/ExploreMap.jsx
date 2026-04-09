@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import KakaoMap from '../components/KakaoMap'
-import { db, DEMO_USER_ID, getAll, getFiltered, getById, where } from '../lib/firebase'
+import { DEMO_USER_ID, getAll, getFiltered, getById, where } from '../lib/firebase'
 import {
   BlurFade, AnimatedGradientText, SparklesText, NumberTicker,
   AnimatedProgress, MagicCard, StaggerContainer, StaggerItem,
@@ -28,14 +27,14 @@ export default function ExploreMap() {
   ])
   const [leaderboard, setLeaderboard] = useState({ score: 0, rank_title: '탐험가' })
 
-  const emojiMap = {
-    '문화유산': '🏛️',
-    '자연경관': '🌅',
-    '체험': '🎭',
-    '맛집': '🍜',
-  }
-
   useEffect(() => {
+    const emojiMap = {
+      '문화유산': '🏛️',
+      '자연경관': '🌅',
+      '체험': '🎭',
+      '맛집': '🍜',
+    }
+
     const fetchData = async () => {
       try {
         const spots = await getAll('tg_spots')

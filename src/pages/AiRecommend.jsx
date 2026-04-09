@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { useChat } from '@ai-sdk/react'
 import {
   BlurFade, AnimatedGradientText, ShimmerButton, Particles,
@@ -27,7 +27,7 @@ function getTextFromParts(parts) {
 export default function AiRecommend() {
   const scrollRef = useRef(null)
   const [input, setInput] = useState('')
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status } = useChat({
     messages: [WELCOME_MESSAGE],
   })
 

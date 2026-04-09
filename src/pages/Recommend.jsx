@@ -6,26 +6,27 @@ export default function Recommend() {
   const [activeFilter, setActiveFilter] = useState('전체')
   const [showMap, setShowMap] = useState(false)
   const [spots, setSpots] = useState([])
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true)
 
   const filters = ['전체', '문화유산', '자연경관', '체험', '맛집']
 
-  const emojiMap = {
-    '문화유산': '🏛️',
-    '자연경관': '🌅',
-    '체험': '🎭',
-    '맛집': '🍜',
-  }
-
-  // Hardcoded spots for fallback while loading
-  const defaultSpots = [
-    { name: '석굴암', dist: '3.5km', match: 91, cat: '문화유산', desc: '신라 불교예술의 최고 걸작', tag: '고궁 보물', emoji: '🏛️' },
-    { name: '첨성대', dist: '1.2km', match: 87, cat: '문화유산', desc: '동양 최고의 천문관측대', tag: '95% 매칭', emoji: '🔭' },
-    { name: '대릉원', dist: '0.8km', match: 83, cat: '문화유산', desc: '천년 왕국의 왕릉 군집', tag: '인기 스팟', emoji: '👑' },
-  ]
-
   // Fetch spots from Firestore
   useEffect(() => {
+    const emojiMap = {
+      '문화유산': '🏛️',
+      '자연경관': '🌅',
+      '체험': '🎭',
+      '맛집': '🍜',
+    }
+
+    // Hardcoded spots for fallback while loading
+    const defaultSpots = [
+      { name: '석굴암', dist: '3.5km', match: 91, cat: '문화유산', desc: '신라 불교예술의 최고 걸작', tag: '고궁 보물', emoji: '🏛️' },
+      { name: '첨성대', dist: '1.2km', match: 87, cat: '문화유산', desc: '동양 최고의 천문관측대', tag: '95% 매칭', emoji: '🔭' },
+      { name: '대릉원', dist: '0.8km', match: 83, cat: '문화유산', desc: '천년 왕국의 왕릉 군집', tag: '인기 스팟', emoji: '👑' },
+    ]
+
     const fetchSpots = async () => {
       try {
         setLoading(true)

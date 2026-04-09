@@ -4,6 +4,7 @@
  * Key: prod_O4REWvflDgCtXp
  */
 import { useState, useEffect, useRef, useMemo } from 'react'
+// eslint-disable-next-line no-unused-vars
 import { motion, useInView, useSpring, useMotionValue, animate, AnimatePresence } from 'framer-motion'
 
 /* ══════════════════════════════════════════════════
@@ -53,7 +54,7 @@ export function NumberTicker({ value, decimals = 0, duration = 1.5, delay = 0, s
         animate(motionVal, typeof value === 'number' ? value : parseFloat(value) || 0, { duration })
       }, delay * 1000)
     }
-  }, [isInView, value, duration, delay])
+  }, [isInView, value, duration, delay, motionVal])
 
   useEffect(() => {
     const unsub = springVal.on('change', v => {
@@ -114,6 +115,7 @@ export function ShimmerButton({ children, onClick, style = {}, shimmerColor = 'r
    4. BORDER BEAM (Animated border glow)
    ══════════════════════════════════════════════════ */
 export function BorderBeam({ children, style = {}, borderRadius = 16, color1 = '#4A6CF7', color2 = '#7DD3FC', duration = 4 }) {
+  // eslint-disable-next-line react-hooks/purity
   const id = useMemo(() => 'bb-' + Math.random().toString(36).slice(2, 8), [])
   return (
     <>
@@ -211,6 +213,7 @@ export function MagicCard({ children, style = {}, glowColor = 'rgba(74,108,247,0
    7. MARQUEE (Infinite scroll)
    ══════════════════════════════════════════════════ */
 export function Marquee({ children, speed = 30, direction = 'left', pauseOnHover = true, style = {} }) {
+  // eslint-disable-next-line react-hooks/purity
   const id = useMemo(() => 'mq-' + Math.random().toString(36).slice(2, 8), [])
   const dir = direction === 'left' ? '' : 'reverse'
   return (
@@ -325,10 +328,15 @@ export function Particles({ count = 30, color = '#4A6CF7', style = {} }) {
   const particles = useMemo(() =>
     Array.from({ length: count }, (_, i) => ({
       id: i,
+      // eslint-disable-next-line react-hooks/purity
       x: Math.random() * 100,
+      // eslint-disable-next-line react-hooks/purity
       y: Math.random() * 100,
+      // eslint-disable-next-line react-hooks/purity
       size: Math.random() * 3 + 1,
+      // eslint-disable-next-line react-hooks/purity
       duration: Math.random() * 15 + 10,
+      // eslint-disable-next-line react-hooks/purity
       delay: Math.random() * 5,
     })), [count])
 
@@ -369,6 +377,7 @@ export function Particles({ count = 30, color = '#4A6CF7', style = {} }) {
    11. NEON GRADIENT CARD
    ══════════════════════════════════════════════════ */
 export function NeonGradientCard({ children, style = {}, borderRadius = 20, neonColors = ['#4A6CF7', '#7DD3FC'] }) {
+  // eslint-disable-next-line react-hooks/purity
   const id = useMemo(() => 'nc-' + Math.random().toString(36).slice(2, 8), [])
   return (
     <>
@@ -416,8 +425,10 @@ export function TypingAnimation({ texts = [], speed = 80, pause = 2000, style = 
     } else if (isDeleting && charIndex > 0) {
       timeout = setTimeout(() => setCharIndex(c => c - 1), speed / 2)
     } else if (isDeleting && charIndex === 0) {
-      setIsDeleting(false)
-      setTextIndex(i => (i + 1) % texts.length)
+      timeout = setTimeout(() => {
+        setIsDeleting(false)
+        setTextIndex(i => (i + 1) % texts.length)
+      }, 300)
     }
 
     return () => clearTimeout(timeout)
@@ -478,6 +489,7 @@ export function StaggerItem({ children, style = {} }) {
    14. SHINE BORDER
    ══════════════════════════════════════════════════ */
 export function ShineBorder({ children, style = {}, borderRadius = 16, color = '#4A6CF7', borderWidth = 2, duration = 3 }) {
+  // eslint-disable-next-line react-hooks/purity
   const id = useMemo(() => 'sb-' + Math.random().toString(36).slice(2, 8), [])
   return (
     <>

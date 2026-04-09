@@ -77,10 +77,9 @@ export default function KakaoMap({ height = 300, center, zoom = 10, markers = 'a
 
     // Determine which spots to show
     let spotsToShow = ALL_SPOTS
-    let cityKey = null
-    if (markers === 'gyeongju') { spotsToShow = SPOTS.gyeongju; cityKey = 'gyeongju' }
-    else if (markers === 'andong') { spotsToShow = SPOTS.andong; cityKey = 'andong' }
-    else if (markers === 'pohang') { spotsToShow = SPOTS.pohang; cityKey = 'pohang' }
+    if (markers === 'gyeongju') { spotsToShow = SPOTS.gyeongju }
+    else if (markers === 'andong') { spotsToShow = SPOTS.andong }
+    else if (markers === 'pohang') { spotsToShow = SPOTS.pohang }
 
     // Add markers
     spotsToShow.forEach(spot => {
@@ -145,7 +144,7 @@ export default function KakaoMap({ height = 300, center, zoom = 10, markers = 'a
         mapInstanceRef.current = null
       }
     }
-  }, [center?.lat, center?.lng, zoom, markers])
+  }, [center, zoom, markers])
 
   return (
     <div

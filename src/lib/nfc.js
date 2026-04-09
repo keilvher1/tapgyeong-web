@@ -1,3 +1,4 @@
+/* global NDEFReader */
 /**
  * NFC 태깅 서비스
  * - Web NFC API 지원 시 실제 NFC 사용
@@ -5,7 +6,7 @@
  */
 import {
   db, DEMO_USER_ID, getById, getFiltered, updateById,
-  setById, createDoc, where, increment, writeBatch, doc, collection,
+  setById, where, writeBatch, doc, collection,
 } from './firebase'
 import logger from './logger'
 
@@ -87,7 +88,6 @@ export async function processNfcTag(spotId, userId = DEMO_USER_ID) {
 
     // 5. 리더보드 점수 추가 (새 방문지 50점, 재방문 10점)
     const points = alreadyUnlocked ? 10 : 50
-    const leaderRef = doc(db, 'tg_leaderboard', userId)
     const leader = await getById('tg_leaderboard', userId)
     if (leader) {
       await updateById('tg_leaderboard', userId, {

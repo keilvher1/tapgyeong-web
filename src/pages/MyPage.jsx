@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { db, DEMO_USER_ID, getAll, getFiltered, getById, countDocs, where, orderBy, limit } from '../lib/firebase'
+import { DEMO_USER_ID, getFiltered, getById, countDocs, where, orderBy, limit } from '../lib/firebase'
 import {
   BlurFade, AnimatedGradientText, SparklesText, NumberTicker,
   AnimatedProgress, MagicCard, StaggerContainer, StaggerItem,
@@ -37,6 +36,7 @@ export default function MyPage() {
   const [visits, setVisits] = useState([])
   const [stampCount, setStampCount] = useState(0)
   const [gyeongjuStamps, setGyeongjuStamps] = useState({ done: 0, total: 0 })
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

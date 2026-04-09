@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { DEMO_USER_ID, getById } from '../lib/firebase'
 import {
   BlurFade, AnimatedGradientText, ShimmerButton, PulsatingButton,

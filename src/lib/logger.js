@@ -3,7 +3,7 @@
  * - 콘솔 + Firestore tg_logs 컬렉션에 로그 저장
  * - 관리자 페이지에서 실시간 로그 조회 가능
  */
-import { db, createDoc } from './firebase'
+import { createDoc } from './firebase'
 
 const MAX_MEMORY_LOGS = 500
 
