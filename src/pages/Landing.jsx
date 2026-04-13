@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import KakaoMap from '../components/KakaoMap'
 import { DEMO_USER_ID, getFiltered, getById, orderBy, limit } from '../lib/firebase'
 import {

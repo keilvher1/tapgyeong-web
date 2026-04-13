@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom'
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { isNfcSupported, startNfcReader, processNfcTag } from '../lib/nfc'
 import { getAll } from '../lib/firebase'
 import logger from '../lib/logger'
