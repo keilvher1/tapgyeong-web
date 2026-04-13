@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useChat } from '@ai-sdk/react'
 import {
   BlurFade, AnimatedGradientText, ShimmerButton, Particles,

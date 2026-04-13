@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { DEMO_USER_ID, getFiltered, where } from '../lib/firebase'
 import {
   BlurFade, AnimatedGradientText, SparklesText, NumberTicker,

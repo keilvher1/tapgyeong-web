@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import KakaoMap from '../components/KakaoMap'
 import { DEMO_USER_ID, getAll, getFiltered, getById, where } from '../lib/firebase'
 import {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { DEMO_USER_ID, getFiltered, getById, countDocs, where, orderBy, limit } from '../lib/firebase'
 import {
   BlurFade, AnimatedGradientText, SparklesText, NumberTicker,
